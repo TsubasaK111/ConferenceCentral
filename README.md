@@ -1,4 +1,6 @@
-App Engine application for the Udacity training course.
+# Conference Central
+My version of Udacity's Full Stack Foundations "Conference Central" Exercise
+utilizing Google App Engine.
 
 ## Products
 - [App Engine][1]
