@@ -28,6 +28,7 @@ class Profile(ndb.Model):
 
 class ProfileMiniForm(messages.Message):
     """ProfileMiniForm -- update Profile form message"""
+    # Contains only the fields editable by users
     displayName  = messages.StringField(1)
     teeShirtSize = messages.EnumField('TeeShirtSize', 2)
 
@@ -42,6 +43,8 @@ class ProfileForm(messages.Message):
 
 class TeeShirtSize(messages.Enum):
     """TeeShirtSize -- t-shirt size enumeration value"""
+    # Because we don't want users to put in arbitrary values,
+    # enum is used. Expected input is text (example: 'XS_M').
     NOT_SPECIFIED = 1
     XS_M   = 2
     XS_W   = 3
