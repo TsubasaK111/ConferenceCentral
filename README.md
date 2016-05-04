@@ -1,6 +1,6 @@
 # Conference Central
 My version of Udacity's Full Stack Foundations "Conference Central" Exercise
-utilizing Google App Engine.
+utilising Google App Engine.
 
 ## Products
 - [App Engine][1]
