@@ -13,7 +13,6 @@ __pycache__/
 *.pyc
 
 # File Uploads by users, including images
-
 */uploads/*
 
 # C extensions
@@ -56,6 +55,9 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *,cover
+
+# Chrome test environment instance
+test/
 
 # Translations
 *.mo
