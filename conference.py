@@ -33,6 +33,8 @@ EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
 
 
+# @endpoints.api( name='conference', version='v1', scopes=[EMAIL_SCOPE],
+#                 allowed_client_ids=[WEB_CLIENT_ID, FRONTING_WEB_CLIENT_ID, API_EXPLORER_CLIENT_ID] )
 @endpoints.api( name='conference', version='v1', scopes=[EMAIL_SCOPE],
                 allowed_client_ids=[WEB_CLIENT_ID, API_EXPLORER_CLIENT_ID] )
 class ConferenceApi(remote.Service):
@@ -84,9 +86,8 @@ class ConferenceApi(remote.Service):
                 mainEmail    = user.email(),
                 teeShirtSize = str(TeeShirtSize.NOT_SPECIFIED),
             )
-            # save profile to datastore
-            profile.put()
-            # returned_profile_key = profile.put()
+            # save new profile to datastore
+            returned_profile_key = profile.put()
             print "returned_profile_key is: "
             print returned_profile_key
         return profile
@@ -97,15 +98,16 @@ class ConferenceApi(remote.Service):
         profile = self._getProfileFromUser()
         # if saveProfile(), process user-modifiable fields
         if save_request:
-            print "save_request! "
+            print "save_request!"
             for field in ('displayName', 'teeShirtSize'):
                 if hasattr(save_request, field):
                     value = getattr(save_request, field)
                     if value:
                         print "setting attr in _doProfile!"
                         setattr(profile, field, str(value))
+            # remember, you have to .put() to finalize any changes made!^^
             profile.put()
-            
+
         # return the ProfileForm
         print "in _doProfile, profile is: "
         print profile
