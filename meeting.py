@@ -217,7 +217,8 @@ def _copyMeetingToForm(self, meeting, displayName):
         print request
         return self._doProfile(request)
 
-    @endpoints.method( MeetingForm, MeetingForm, path='meeting', http_method='POST', name='createMeeting')
+    @endpoints.method( MeetingForm, MeetingForm,
+                       path='meeting', http_method='POST', name='createMeeting' )
     def createMeeting(self, request):
         """Create new meeting."""
         return self._createMeetingObject(request)

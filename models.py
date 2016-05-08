@@ -88,6 +88,5 @@ class MeetingForm(messages.Message):
     endDate         = messages.StringField(8)
     maxAttendees    = messages.StringField(9)
     seatsAvailable  = messages.StringField(10)
-    # ss
     webSafeKey      = messages.StringField(11)
     organizerDisplayName = messages.StringField(12)
