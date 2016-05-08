@@ -2,11 +2,11 @@
 
 """models.py
 
-Udacity conference server-side Python App Engine data & ProtoRPC models
+Udacity meeting server-side Python App Engine data & ProtoRPC models
 
 $Id: models.py,v 1.1 2014/05/24 22:01:10 wesc Exp $
 
-created/forked from conferences.py by wesc on 2014 may 24
+created/forked from meetings.py by wesc on 2014 may 24
 
 """
 
@@ -60,3 +60,34 @@ class TeeShirtSize(messages.Enum):
     XXL_W  = 13
     XXXL_M = 14
     XXXL_W = 15
+
+
+class Meeting(ndb.Model):
+    """Meeting -- Meeting object"""
+    name            = ndb.StringProperty(required=True)
+    description     = ndb.StringProperty()
+    organizerUserId = ndb.StringProperty()
+    topics          = ndb.StringProperty(repeated=True)
+    city            = ndb.StringProperty()
+    startDate       = ndb.DateProperty()
+    month           = ndb.IntegerProperty()
+    endDate         = ndb.DateProperty()
+    maxAttendees    = ndb.IntegerProperty()
+    seatsAvailable  = ndb.IntegerProperty()
+
+
+class MeetingForm(messages.Message):
+    """MeetingForm == Meeting outbound form message"""
+    name            = messages.StringField(1)
+    description     = messages.StringField(2)
+    organizerUserId = messages.StringField(3)
+    topics          = messages.StringField(4, repeated=True)
+    city            = messages.StringField(5)
+    startDate       = messages.StringField(6)
+    month           = messages.StringField(7)
+    endDate         = messages.StringField(8)
+    maxAttendees    = messages.StringField(9)
+    seatsAvailable  = messages.StringField(10)
+    # ss
+    webSafeKey      = messages.StringField(11)
+    organizerDisplayName = messages.StringField(12)

@@ -1,4 +1,4 @@
-<div ng-controller="ConferenceDetailCtrl">
+<div ng-controller="MeetingDetailCtrl">
     <div class="row">
         <div class="col-lg-12">
             <div id="messages" class="alert alert-{{alertStatus}}" ng-show="messages">
@@ -13,19 +13,19 @@
     <div class="row" ng-init="init()">
         <div class="col-md-9">
             <div class="well well-sm">
-                <h2>{{conference.name}}</h2>
-                <h5>{{conference.description}}</h5>
+                <h2>{{meeting.name}}</h2>
+                <h5>{{meeting.description}}</h5>
                 <div>
                     <label for="registered">Registered/Open: </label>
-                    <span id="registered">{{conference.maxAttendees - conference.seatsAvailable}} / {{conference.maxAttendees}}</span>
+                    <span id="registered">{{meeting.maxAttendees - meeting.seatsAvailable}} / {{meeting.maxAttendees}}</span>
                 </div>
                 <div>
                     <label for="organizer">Organizer: </label>
-                    <span id="organizer">{{conference.organizerDisplayName}}</span>
+                    <span id="organizer">{{meeting.organizerDisplayName}}</span>
                 </div>
-                <p><a class="btn btn-primary" ng-hide="isUserAttending" ng-click="registerForConference()"
+                <p><a class="btn btn-primary" ng-hide="isUserAttending" ng-click="registerForMeeting()"
                         ng-disabled="loading">Register</a></p>
-                <p><a class="btn btn-primary" ng-show="isUserAttending" ng-click="unregisterFromConference()"
+                <p><a class="btn btn-primary" ng-show="isUserAttending" ng-click="unregisterFromMeeting()"
                         ng-disabled="loading">Unregister</a></p>
             </div>
 
@@ -33,21 +33,21 @@
                 <fieldset>
                     <div>
                         <label for="city">City: </label>
-                        <span id="city">{{conference.city}}</span>
+                        <span id="city">{{meeting.city}}</span>
                     </div>
                     <div>
                         <label for="topics">Topics: </label>
                         <span id="topics">
-                            <span ng-repeat="topic in conference.topics" class="label label-primary label-separated">{{topic}}</span>
+                            <span ng-repeat="topic in meeting.topics" class="label label-primary label-separated">{{topic}}</span>
                         </span>
                     </div>
                     <div>
                         <label for="startDate">Start Date: </label>
-                        <span id="startDate">{{conference.startDate | date:'dd-MMMM-yyyy'}}</span>
+                        <span id="startDate">{{meeting.startDate | date:'dd-MMMM-yyyy'}}</span>
                     </div>
                     <div>
                         <label for="endDate">End Date: </label>
-                        <span id="endDate">{{conference.endDate | date:'dd-MMMM-yyyy'}}</span>
+                        <span id="endDate">{{meeting.endDate | date:'dd-MMMM-yyyy'}}</span>
                     </div>
                 </fieldset>
             </form>

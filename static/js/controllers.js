@@ -1,21 +1,21 @@
 'use strict';
 
 /**
- * The root conferenceApp module.
+ * The root meetingApp module.
  *
- * @type {conferenceApp|*|{}}
+ * @type {meetingApp|*|{}}
  */
-var conferenceApp = conferenceApp || {};
+var meetingApp = meetingApp || {};
 
 /**
  * @ngdoc module
- * @name conferenceControllers
+ * @name meetingControllers
  *
  * @description
  * Angular module for controllers.
  *
  */
-conferenceApp.controllers = angular.module('conferenceControllers', ['ui.bootstrap']);
+meetingApp.controllers = angular.module('meetingControllers', ['ui.bootstrap']);
 
 /**
  * @ngdoc controller
@@ -24,7 +24,7 @@ conferenceApp.controllers = angular.module('conferenceControllers', ['ui.bootstr
  * @description
  * A controller used for the My Profile page.
  */
-conferenceApp.controllers.controller('MyProfileCtrl',
+meetingApp.controllers.controller('MyProfileCtrl',
     function ($scope, $log, oauth2Provider, HTTP_ERRORS) {
         $scope.submitted = false;
         $scope.loading = false;
@@ -63,7 +63,7 @@ conferenceApp.controllers.controller('MyProfileCtrl',
             var retrieveProfileCallback = function () {
                 $scope.profile = {};
                 $scope.loading = true;
-                gapi.client.conference.getProfile().
+                gapi.client.meeting.getProfile().
                     execute(function (resp) {
                         $scope.$apply(function () {
                             $scope.loading = false;
@@ -88,13 +88,13 @@ conferenceApp.controllers.controller('MyProfileCtrl',
         };
 
         /**
-         * Invokes the conference.saveProfile API.
+         * Invokes the meeting.saveProfile API.
          *
          */
         $scope.saveProfile = function () {
             $scope.submitted = true;
             $scope.loading = true;
-            gapi.client.conference.saveProfile($scope.profile).
+            gapi.client.meeting.saveProfile($scope.profile).
                 execute(function (resp) {
                     $scope.$apply(function () {
                         $scope.loading = false;
@@ -129,19 +129,19 @@ conferenceApp.controllers.controller('MyProfileCtrl',
 
 /**
  * @ngdoc controller
- * @name CreateConferenceCtrl
+ * @name CreateMeetingCtrl
  *
  * @description
- * A controller used for the Create conferences page.
+ * A controller used for the Create meetings page.
  */
-conferenceApp.controllers.controller('CreateConferenceCtrl',
+meetingApp.controllers.controller('CreateMeetingCtrl',
     function ($scope, $log, oauth2Provider, HTTP_ERRORS) {
 
         /**
-         * The conference object being edited in the page.
+         * The meeting object being edited in the page.
          * @type {{}|*}
          */
-        $scope.conference = $scope.conference || {};
+        $scope.meeting = $scope.meeting || {};
 
         /**
          * Holds the default values for the input candidates for city select.
@@ -172,58 +172,58 @@ conferenceApp.controllers.controller('CreateConferenceCtrl',
          * @returns {boolean} true if the argument is an integer, false otherwise.
          */
         $scope.isValidMaxAttendees = function () {
-            if (!$scope.conference.maxAttendees || $scope.conference.maxAttendees.length == 0) {
+            if (!$scope.meeting.maxAttendees || $scope.meeting.maxAttendees.length == 0) {
                 return true;
             }
-            return /^[\d]+$/.test($scope.conference.maxAttendees) && $scope.conference.maxAttendees >= 0;
+            return /^[\d]+$/.test($scope.meeting.maxAttendees) && $scope.meeting.maxAttendees >= 0;
         }
 
         /**
-         * Tests if the conference.startDate and conference.endDate are valid.
+         * Tests if the meeting.startDate and meeting.endDate are valid.
          * @returns {boolean} true if the dates are valid, false otherwise.
          */
         $scope.isValidDates = function () {
-            if (!$scope.conference.startDate && !$scope.conference.endDate) {
+            if (!$scope.meeting.startDate && !$scope.meeting.endDate) {
                 return true;
             }
-            if ($scope.conference.startDate && !$scope.conference.endDate) {
+            if ($scope.meeting.startDate && !$scope.meeting.endDate) {
                 return true;
             }
-            return $scope.conference.startDate <= $scope.conference.endDate;
+            return $scope.meeting.startDate <= $scope.meeting.endDate;
         }
 
         /**
-         * Tests if $scope.conference is valid.
-         * @param conferenceForm the form object from the create_conferences.html page.
+         * Tests if $scope.meeting is valid.
+         * @param meetingForm the form object from the create_meetings.html page.
          * @returns {boolean|*} true if valid, false otherwise.
          */
-        $scope.isValidConference = function (conferenceForm) {
-            return !conferenceForm.$invalid &&
+        $scope.isValidMeeting = function (meetingForm) {
+            return !meetingForm.$invalid &&
                 $scope.isValidMaxAttendees() &&
                 $scope.isValidDates();
         }
 
         /**
-         * Invokes the conference.createConference API.
+         * Invokes the meeting.createMeeting API.
          *
-         * @param conferenceForm the form object.
+         * @param meetingForm the form object.
          */
-        $scope.createConference = function (conferenceForm) {
-            if (!$scope.isValidConference(conferenceForm)) {
+        $scope.createMeeting = function (meetingForm) {
+            if (!$scope.isValidMeeting(meetingForm)) {
                 return;
             }
 
             $scope.loading = true;
-            gapi.client.conference.createConference($scope.conference).
+            gapi.client.meeting.createMeeting($scope.meeting).
                 execute(function (resp) {
                     $scope.$apply(function () {
                         $scope.loading = false;
                         if (resp.error) {
                             // The request has failed.
                             var errorMessage = resp.error.message || '';
-                            $scope.messages = 'Failed to create a conference : ' + errorMessage;
+                            $scope.messages = 'Failed to create a meeting : ' + errorMessage;
                             $scope.alertStatus = 'warning';
-                            $log.error($scope.messages + ' Conference : ' + JSON.stringify($scope.conference));
+                            $log.error($scope.messages + ' Meeting : ' + JSON.stringify($scope.meeting));
 
                             if (resp.code && resp.code == HTTP_ERRORS.UNAUTHORIZED) {
                                 oauth2Provider.showLoginModal();
@@ -231,10 +231,10 @@ conferenceApp.controllers.controller('CreateConferenceCtrl',
                             }
                         } else {
                             // The request has succeeded.
-                            $scope.messages = 'The conference has been created : ' + resp.result.name;
+                            $scope.messages = 'The meeting has been created : ' + resp.result.name;
                             $scope.alertStatus = 'success';
                             $scope.submitted = false;
-                            $scope.conference = {};
+                            $scope.meeting = {};
                             $log.info($scope.messages + ' : ' + JSON.stringify(resp.result));
                         }
                     });
@@ -244,12 +244,12 @@ conferenceApp.controllers.controller('CreateConferenceCtrl',
 
 /**
  * @ngdoc controller
- * @name ShowConferenceCtrl
+ * @name ShowMeetingCtrl
  *
  * @description
- * A controller used for the Show conferences page.
+ * A controller used for the Show meetings page.
  */
-conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $log, oauth2Provider, HTTP_ERRORS) {
+meetingApp.controllers.controller('ShowMeetingCtrl', function ($scope, $log, oauth2Provider, HTTP_ERRORS) {
 
     /**
      * Holds the status if the query is being executed.
@@ -260,7 +260,7 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
     $scope.selectedTab = 'ALL';
 
     /**
-     * Holds the filters that will be applied when queryConferencesAll is invoked.
+     * Holds the filters that will be applied when queryMeetingsAll is invoked.
      * @type {Array}
      */
     $scope.filters = [
@@ -288,10 +288,10 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
     ];
 
     /**
-     * Holds the conferences currently displayed in the page.
+     * Holds the meetings currently displayed in the page.
      * @type {Array}
      */
-    $scope.conferences = [];
+    $scope.meetings = [];
 
     /**
      * Holds the state if offcanvas is enabled.
@@ -305,7 +305,7 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
      */
     $scope.tabAllSelected = function () {
         $scope.selectedTab = 'ALL';
-        $scope.queryConferences();
+        $scope.queryMeetings();
     };
 
     /**
@@ -317,7 +317,7 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
             oauth2Provider.showLoginModal();
             return;
         }
-        $scope.queryConferences();
+        $scope.queryMeetings();
     };
 
     /**
@@ -329,7 +329,7 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
             oauth2Provider.showLoginModal();
             return;
         }
-        $scope.queryConferences();
+        $scope.queryMeetings();
     };
 
     /**
@@ -352,7 +352,7 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
      * @returns {number}
      */
     $scope.pagination.numberOfPages = function () {
-        return Math.ceil($scope.conferences.length / $scope.pagination.pageSize);
+        return Math.ceil($scope.meetings.length / $scope.pagination.pageSize);
     };
 
     /**
@@ -409,24 +409,24 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
     };
 
     /**
-     * Query the conferences depending on the tab currently selected.
+     * Query the meetings depending on the tab currently selected.
      *
      */
-    $scope.queryConferences = function () {
+    $scope.queryMeetings = function () {
         $scope.submitted = false;
         if ($scope.selectedTab == 'ALL') {
-            $scope.queryConferencesAll();
+            $scope.queryMeetingsAll();
         } else if ($scope.selectedTab == 'YOU_HAVE_CREATED') {
-            $scope.getConferencesCreated();
+            $scope.getMeetingsCreated();
         } else if ($scope.selectedTab == 'YOU_WILL_ATTEND') {
-            $scope.getConferencesAttend();
+            $scope.getMeetingsAttend();
         }
     };
 
     /**
-     * Invokes the conference.queryConferences API.
+     * Invokes the meeting.queryMeetings API.
      */
-    $scope.queryConferencesAll = function () {
+    $scope.queryMeetingsAll = function () {
         var sendFilters = {
             filters: []
         }
@@ -441,14 +441,14 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
             }
         }
         $scope.loading = true;
-        gapi.client.conference.queryConferences(sendFilters).
+        gapi.client.meeting.queryMeetings(sendFilters).
             execute(function (resp) {
                 $scope.$apply(function () {
                     $scope.loading = false;
                     if (resp.error) {
                         // The request has failed.
                         var errorMessage = resp.error.message || '';
-                        $scope.messages = 'Failed to query conferences : ' + errorMessage;
+                        $scope.messages = 'Failed to query meetings : ' + errorMessage;
                         $scope.alertStatus = 'warning';
                         $log.error($scope.messages + ' filters : ' + JSON.stringify(sendFilters));
                     } else {
@@ -458,9 +458,9 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
                         $scope.alertStatus = 'success';
                         $log.info($scope.messages);
 
-                        $scope.conferences = [];
-                        angular.forEach(resp.items, function (conference) {
-                            $scope.conferences.push(conference);
+                        $scope.meetings = [];
+                        angular.forEach(resp.items, function (meeting) {
+                            $scope.meetings.push(meeting);
                         });
                     }
                     $scope.submitted = true;
@@ -469,18 +469,18 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
     }
 
     /**
-     * Invokes the conference.getConferencesCreated method.
+     * Invokes the meeting.getMeetingsCreated method.
      */
-    $scope.getConferencesCreated = function () {
+    $scope.getMeetingsCreated = function () {
         $scope.loading = true;
-        gapi.client.conference.getConferencesCreated().
+        gapi.client.meeting.getMeetingsCreated().
             execute(function (resp) {
                 $scope.$apply(function () {
                     $scope.loading = false;
                     if (resp.error) {
                         // The request has failed.
                         var errorMessage = resp.error.message || '';
-                        $scope.messages = 'Failed to query the conferences created : ' + errorMessage;
+                        $scope.messages = 'Failed to query the meetings created : ' + errorMessage;
                         $scope.alertStatus = 'warning';
                         $log.error($scope.messages);
 
@@ -491,13 +491,13 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
                     } else {
                         // The request has succeeded.
                         $scope.submitted = false;
-                        $scope.messages = 'Query succeeded : Conferences you have created';
+                        $scope.messages = 'Query succeeded : Meetings you have created';
                         $scope.alertStatus = 'success';
                         $log.info($scope.messages);
 
-                        $scope.conferences = [];
-                        angular.forEach(resp.items, function (conference) {
-                            $scope.conferences.push(conference);
+                        $scope.meetings = [];
+                        angular.forEach(resp.items, function (meeting) {
+                            $scope.meetings.push(meeting);
                         });
                     }
                     $scope.submitted = true;
@@ -506,18 +506,18 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
     };
 
     /**
-     * Retrieves the conferences to attend by calling the conference.getProfile method and
-     * invokes the conference.getConference method n times where n == the number of the conferences to attend.
+     * Retrieves the meetings to attend by calling the meeting.getProfile method and
+     * invokes the meeting.getMeeting method n times where n == the number of the meetings to attend.
      */
-    $scope.getConferencesAttend = function () {
+    $scope.getMeetingsAttend = function () {
         $scope.loading = true;
-        gapi.client.conference.getConferencesToAttend().
+        gapi.client.meeting.getMeetingsToAttend().
             execute(function (resp) {
                 $scope.$apply(function () {
                     if (resp.error) {
                         // The request has failed.
                         var errorMessage = resp.error.message || '';
-                        $scope.messages = 'Failed to query the conferences to attend : ' + errorMessage;
+                        $scope.messages = 'Failed to query the meetings to attend : ' + errorMessage;
                         $scope.alertStatus = 'warning';
                         $log.error($scope.messages);
 
@@ -527,9 +527,9 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
                         }
                     } else {
                         // The request has succeeded.
-                        $scope.conferences = resp.result.items;
+                        $scope.meetings = resp.result.items;
                         $scope.loading = false;
-                        $scope.messages = 'Query succeeded : Conferences you will attend (or you have attended)';
+                        $scope.messages = 'Query succeeded : Meetings you will attend (or you have attended)';
                         $scope.alertStatus = 'success';
                         $log.info($scope.messages);
                     }
@@ -542,57 +542,57 @@ conferenceApp.controllers.controller('ShowConferenceCtrl', function ($scope, $lo
 
 /**
  * @ngdoc controller
- * @name ConferenceDetailCtrl
+ * @name MeetingDetailCtrl
  *
  * @description
- * A controller used for the conference detail page.
+ * A controller used for the meeting detail page.
  */
-conferenceApp.controllers.controller('ConferenceDetailCtrl', function ($scope, $log, $routeParams, HTTP_ERRORS) {
-    $scope.conference = {};
+meetingApp.controllers.controller('MeetingDetailCtrl', function ($scope, $log, $routeParams, HTTP_ERRORS) {
+    $scope.meeting = {};
 
     $scope.isUserAttending = false;
 
     /**
-     * Initializes the conference detail page.
-     * Invokes the conference.getConference method and sets the returned conference in the $scope.
+     * Initializes the meeting detail page.
+     * Invokes the meeting.getMeeting method and sets the returned meeting in the $scope.
      *
      */
     $scope.init = function () {
         $scope.loading = true;
-        gapi.client.conference.getConference({
-            websafeConferenceKey: $routeParams.websafeConferenceKey
+        gapi.client.meeting.getMeeting({
+            websafeMeetingKey: $routeParams.websafeMeetingKey
         }).execute(function (resp) {
             $scope.$apply(function () {
                 $scope.loading = false;
                 if (resp.error) {
                     // The request has failed.
                     var errorMessage = resp.error.message || '';
-                    $scope.messages = 'Failed to get the conference : ' + $routeParams.websafeKey
+                    $scope.messages = 'Failed to get the meeting : ' + $routeParams.websafeKey
                         + ' ' + errorMessage;
                     $scope.alertStatus = 'warning';
                     $log.error($scope.messages);
                 } else {
                     // The request has succeeded.
                     $scope.alertStatus = 'success';
-                    $scope.conference = resp.result;
+                    $scope.meeting = resp.result;
                 }
             });
         });
 
         $scope.loading = true;
-        // If the user is attending the conference, updates the status message and available function.
-        gapi.client.conference.getProfile().execute(function (resp) {
+        // If the user is attending the meeting, updates the status message and available function.
+        gapi.client.meeting.getProfile().execute(function (resp) {
             $scope.$apply(function () {
                 $scope.loading = false;
                 if (resp.error) {
                     // Failed to get a user profile.
                 } else {
                     var profile = resp.result;
-                    for (var i = 0; i < profile.conferenceKeysToAttend.length; i++) {
-                        if ($routeParams.websafeConferenceKey == profile.conferenceKeysToAttend[i]) {
-                            // The user is attending the conference.
+                    for (var i = 0; i < profile.meetingKeysToAttend.length; i++) {
+                        if ($routeParams.websafeMeetingKey == profile.meetingKeysToAttend[i]) {
+                            // The user is attending the meeting.
                             $scope.alertStatus = 'info';
-                            $scope.messages = 'You are attending this conference';
+                            $scope.messages = 'You are attending this meeting';
                             $scope.isUserAttending = true;
                         }
                     }
@@ -603,19 +603,19 @@ conferenceApp.controllers.controller('ConferenceDetailCtrl', function ($scope, $
 
 
     /**
-     * Invokes the conference.registerForConference method.
+     * Invokes the meeting.registerForMeeting method.
      */
-    $scope.registerForConference = function () {
+    $scope.registerForMeeting = function () {
         $scope.loading = true;
-        gapi.client.conference.registerForConference({
-            websafeConferenceKey: $routeParams.websafeConferenceKey
+        gapi.client.meeting.registerForMeeting({
+            websafeMeetingKey: $routeParams.websafeMeetingKey
         }).execute(function (resp) {
             $scope.$apply(function () {
                 $scope.loading = false;
                 if (resp.error) {
                     // The request has failed.
                     var errorMessage = resp.error.message || '';
-                    $scope.messages = 'Failed to register for the conference : ' + errorMessage;
+                    $scope.messages = 'Failed to register for the meeting : ' + errorMessage;
                     $scope.alertStatus = 'warning';
                     $log.error($scope.messages);
 
@@ -626,12 +626,12 @@ conferenceApp.controllers.controller('ConferenceDetailCtrl', function ($scope, $
                 } else {
                     if (resp.result) {
                         // Register succeeded.
-                        $scope.messages = 'Registered for the conference';
+                        $scope.messages = 'Registered for the meeting';
                         $scope.alertStatus = 'success';
                         $scope.isUserAttending = true;
-                        $scope.conference.seatsAvailable = $scope.conference.seatsAvailable - 1;
+                        $scope.meeting.seatsAvailable = $scope.meeting.seatsAvailable - 1;
                     } else {
-                        $scope.messages = 'Failed to register for the conference';
+                        $scope.messages = 'Failed to register for the meeting';
                         $scope.alertStatus = 'warning';
                     }
                 }
@@ -640,19 +640,19 @@ conferenceApp.controllers.controller('ConferenceDetailCtrl', function ($scope, $
     };
 
     /**
-     * Invokes the conference.unregisterForConference method.
+     * Invokes the meeting.unregisterForMeeting method.
      */
-    $scope.unregisterFromConference = function () {
+    $scope.unregisterFromMeeting = function () {
         $scope.loading = true;
-        gapi.client.conference.unregisterFromConference({
-            websafeConferenceKey: $routeParams.websafeConferenceKey
+        gapi.client.meeting.unregisterFromMeeting({
+            websafeMeetingKey: $routeParams.websafeMeetingKey
         }).execute(function (resp) {
             $scope.$apply(function () {
                 $scope.loading = false;
                 if (resp.error) {
                     // The request has failed.
                     var errorMessage = resp.error.message || '';
-                    $scope.messages = 'Failed to unregister from the conference : ' + errorMessage;
+                    $scope.messages = 'Failed to unregister from the meeting : ' + errorMessage;
                     $scope.alertStatus = 'warning';
                     $log.error($scope.messages);
                     if (resp.code && resp.code == HTTP_ERRORS.UNAUTHORIZED) {
@@ -662,16 +662,16 @@ conferenceApp.controllers.controller('ConferenceDetailCtrl', function ($scope, $
                 } else {
                     if (resp.result) {
                         // Unregister succeeded.
-                        $scope.messages = 'Unregistered from the conference';
+                        $scope.messages = 'Unregistered from the meeting';
                         $scope.alertStatus = 'success';
-                        $scope.conference.seatsAvailable = $scope.conference.seatsAvailable + 1;
+                        $scope.meeting.seatsAvailable = $scope.meeting.seatsAvailable + 1;
                         $scope.isUserAttending = false;
                         $log.info($scope.messages);
                     } else {
                         var errorMessage = resp.error.message || '';
-                        $scope.messages = 'Failed to unregister from the conference : ' + $routeParams.websafeKey +
+                        $scope.messages = 'Failed to unregister from the meeting : ' + $routeParams.websafeKey +
                             ' : ' + errorMessage;
-                        $scope.messages = 'Failed to unregister from the conference';
+                        $scope.messages = 'Failed to unregister from the meeting';
                         $scope.alertStatus = 'warning';
                         $log.error($scope.messages);
                     }
@@ -691,7 +691,7 @@ conferenceApp.controllers.controller('ConferenceDetailCtrl', function ($scope, $
  * such as user authentications.
  *
  */
-conferenceApp.controllers.controller('RootCtrl', function ($scope, $location, oauth2Provider) {
+meetingApp.controllers.controller('RootCtrl', function ($scope, $location, oauth2Provider) {
 
     /**
      * Returns if the viewLocation is the currently viewed page.
@@ -777,7 +777,7 @@ conferenceApp.controllers.controller('RootCtrl', function ($scope, $location, oa
  * The controller for the modal dialog that is shown when an user needs to login to achive some functions.
  *
  */
-conferenceApp.controllers.controller('OAuth2LoginModalCtrl',
+meetingApp.controllers.controller('OAuth2LoginModalCtrl',
     function ($scope, $modalInstance, $rootScope, oauth2Provider) {
         $scope.singInViaModal = function () {
             oauth2Provider.signIn(function () {
@@ -801,7 +801,7 @@ conferenceApp.controllers.controller('OAuth2LoginModalCtrl',
  * @description
  * A controller that holds properties for a datepicker.
  */
-conferenceApp.controllers.controller('DatepickerCtrl', function ($scope) {
+meetingApp.controllers.controller('DatepickerCtrl', function ($scope) {
     $scope.today = function () {
         $scope.dt = new Date();
     };

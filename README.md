@@ -1,5 +1,5 @@
-# Conference Central
-My version of Udacity's Full Stack Foundations "Conference Central" Exercise
+# Meeting Master
+My version of Udacity's Full Stack Foundations "Meeting Master" Exercise
 utilising Google App Engine.
 
 ## Products

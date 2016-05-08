@@ -66,7 +66,7 @@ body {
     vertical-align: middle;
 }
 
-#show-conferences-tab {
+#show-meetings-tab {
     margin-bottom: 20px;
 }
 
@@ -80,7 +80,7 @@ ul#filters span.glyphicon-remove {
     font-size: 80%;
 }
 
-ul#conferences-list {
+ul#meetings-list {
     list-style: none;
 }
 

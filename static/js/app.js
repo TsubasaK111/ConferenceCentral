@@ -2,31 +2,31 @@
 
 /**
  * @ngdoc object
- * @name conferenceApp
+ * @name meetingApp
  * @requires $routeProvider
- * @requires conferenceControllers
+ * @requires meetingControllers
  * @requires ui.bootstrap
  *
  * @description
  * Root app, which routes and specifies the partial html and controller depending on the url requested.
  *
  */
-var app = angular.module('conferenceApp',
-    ['conferenceControllers', 'ngRoute', 'ui.bootstrap']).
+var app = angular.module('meetingApp',
+    ['meetingControllers', 'ngRoute', 'ui.bootstrap']).
     config(['$routeProvider',
         function ($routeProvider) {
             $routeProvider.
-                when('/conference', {
-                    templateUrl: '/partials/show_conferences.html',
-                    controller: 'ShowConferenceCtrl'
+                when('/meeting', {
+                    templateUrl: '/partials/show_meetings.html',
+                    controller: 'ShowMeetingCtrl'
                 }).
-                when('/conference/create', {
-                    templateUrl: '/partials/create_conferences.html',
-                    controller: 'CreateConferenceCtrl'
+                when('/meeting/create', {
+                    templateUrl: '/partials/create_meetings.html',
+                    controller: 'CreateMeetingCtrl'
                 }).
-                when('/conference/detail/:websafeConferenceKey', {
-                    templateUrl: '/partials/conference_detail.html',
-                    controller: 'ConferenceDetailCtrl'
+                when('/meeting/detail/:websafeMeetingKey', {
+                    templateUrl: '/partials/meeting_detail.html',
+                    controller: 'MeetingDetailCtrl'
                 }).
                 when('/profile', {
                     templateUrl: '/partials/profile.html',
@@ -86,7 +86,7 @@ app.constant('HTTP_ERRORS', {
  */
 app.factory('oauth2Provider', function ($modal) {
     var oauth2Provider = {
-        CLIENT_ID: "413636681377-je9tnh5rp50rgo56l2ag2kgh8ndom6lq.apps.googleusercontent.com",
+        CLIENT_ID: "394268247511-hpuutu00ufkd31qte9339cfoj12rhr9l.apps.googleusercontent.com",
         SCOPES: 'email profile',
         signedIn: false
     }
