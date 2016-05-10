@@ -27,10 +27,10 @@ from models import Profile, ProfileMiniForm, ProfileForm, TeeShirtSize
 from models import Meeting, MeetingForm
 
 from utils import getUserId
+
 from settings import WEB_CLIENT_ID, FRONTING_WEB_CLIENT_ID
 
 import pdb
-
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -43,11 +43,11 @@ MEETING_DEFAULTS = { "city": "Default City",
 @endpoints.api( name='meeting', version='v1', scopes=[EMAIL_SCOPE],
                 allowed_client_ids=[ WEB_CLIENT_ID,
                                      FRONTING_WEB_CLIENT_ID,
-                                     API_EXPLORER_CLIENT_ID ] )
+                                     API_EXPLORER_CLIENT_ID ], )
 class MeetingApi(remote.Service):
     """Meeting API v0.1"""
 
-    # - - - Helper Functions - - - - - - - - - - - - - - - - - - -
+    # - - - Profile Objects - - - - - - - - - - - - - - - - - - -
     def _copyProfileToForm(self, profile):
         """Copy relevant fields from Profile to ProfileForm."""
         profileForm = ProfileForm()
@@ -123,6 +123,40 @@ class MeetingApi(remote.Service):
         return self._copyProfileToForm(profile)
 
 
+    @endpoints.method( message_types.VoidMessage, ProfileForm,
+                       path='profile', http_method='GET', name='getProfile' )
+    def getProfile(self, request):
+        """Return user profile."""
+        return self._doProfile()
+
+    @endpoints.method( ProfileMiniForm, ProfileForm,
+                   path='profile', http_method='POST', name='saveProfile' )
+    def saveProfile(self, request):
+        """Update & return user profile."""
+        # request contains only fields in the ProfileMiniForm.
+        # Pass this to _doProfile function, which will return profile info
+        # from the datastore.
+        print request
+        return self._doProfile(request)
+
+
+    # - - - Meeting Objects - - - - - - - - - - - - - -
+    def _copyMeetingToForm(self, meeting, displayName):
+        """Copy relevant fields from Meeting to MeetingForm"""
+        meetingForm = MeetingForm()
+        for field in meetingForm.all_fields():
+            if hasattr(meeting, field.name):
+                # convert Date to date string: just copy others
+                if field.name.endswith('Date'):
+                    setattr(meeting, field.name, str(getattr(meeting, field.name)))
+                elif field.name == "webSafeKey":
+                    setattr(meeting, field.name, onf.key.urlsafe())
+                else:
+                    setattr(meeting, field.name, getattr(meeting, field.name))
+            if displayName:
+                setattr(meeting, "organizerDisplayName", displayName)
+            meeting.check_initialized()
+            return meeting
 
     def _createMeetingObject(self, request):
         """Create or update Meeting object, returning MeetingForm/request."""
@@ -182,46 +216,12 @@ class MeetingApi(remote.Service):
         return request
 
 
-def _copyMeetingToForm(self, meeting, displayName):
-    """Copy relevant fields from Meeting to MeetingForm"""
-    meetingForm = MeetingForm()
-    for field in meetingForm.all_fields():
-        if hasattr(meeting, field.name):
-            # convert Date to date string: just copy others
-            if field.name.endswith('Date'):
-                setattr(meeting, field.name, str(getattr(meeting, field.name)))
-            elif field.name == "webSafeKey":
-                setattr(meeting, field.name, onf.key.urlsafe())
-            else:
-                setattr(meeting, field.name, getattr(meeting, field.name))
-        if displayName:
-            setattr(meeting, "organizerDisplayName", displayName)
-        meeting.check_initialized()
-        return meeting
-
-
-    # - - - Endpoint Routing  - - - - - - - - - - - - - - - - - - -
-    @endpoints.method( message_types.VoidMessage, ProfileForm,
-                       path='profile', http_method='GET', name='getProfile' )
-    def getProfile(self, request):
-        """Return user profile."""
-        return self._doProfile()
-
-    @endpoints.method( ProfileMiniForm, ProfileForm,
-                   path='profile', http_method='POST', name='saveProfile' )
-    def saveProfile(self, request):
-        """Update & return user profile."""
-        # request contains only fields in the ProfileMiniForm.
-        # Pass this to _doProfile function, which will return profile info
-        # from the datastore.
-        print request
-        return self._doProfile(request)
-
     @endpoints.method( MeetingForm, MeetingForm,
                        path='meeting', http_method='POST', name='createMeeting' )
     def createMeeting(self, request):
         """Create new meeting."""
         return self._createMeetingObject(request)
+
 
 # registers API
 api = endpoints.api_server([MeetingApi])
