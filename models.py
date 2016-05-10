@@ -71,9 +71,9 @@ class Meeting(ndb.Model):
     city            = ndb.StringProperty()
     startDate       = ndb.DateProperty()
     month           = ndb.IntegerProperty()
-    endDate         = ndb.DateProperty()
     maxAttendees    = ndb.IntegerProperty()
     seatsAvailable  = ndb.IntegerProperty()
+    endDate         = ndb.DateProperty()
 
 
 class MeetingForm(messages.Message):
@@ -84,9 +84,9 @@ class MeetingForm(messages.Message):
     topics          = messages.StringField(4, repeated=True)
     city            = messages.StringField(5)
     startDate       = messages.StringField(6)
-    month           = messages.StringField(7)
-    endDate         = messages.StringField(8)
-    maxAttendees    = messages.StringField(9)
-    seatsAvailable  = messages.StringField(10)
+    month           = messages.IntegerField(7)
+    maxAttendees    = messages.IntegerField(8)
+    seatsAvailable  = messages.IntegerField(9)
+    endDate         = messages.StringField(10)
     webSafeKey      = messages.StringField(11)
     organizerDisplayName = messages.StringField(12)

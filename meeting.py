@@ -150,7 +150,7 @@ class MeetingApi(remote.Service):
                 if field.name.endswith('Date'):
                     setattr(meeting, field.name, str(getattr(meeting, field.name)))
                 elif field.name == "webSafeKey":
-                    setattr(meeting, field.name, onf.key.urlsafe())
+                    setattr(meeting, field.name, meeting.key.urlsafe())
                 else:
                     setattr(meeting, field.name, getattr(meeting, field.name))
             if displayName:
@@ -161,7 +161,7 @@ class MeetingApi(remote.Service):
     def _createMeetingObject(self, request):
         """Create or update Meeting object, returning MeetingForm/request."""
         # guard clauses / load prerequisites
-        users = endpoints.get_current_user()
+        user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
         user_id = getUserId(user)
@@ -178,10 +178,10 @@ class MeetingApi(remote.Service):
         del data['organizerDisplayName']
 
         # add default values for those mission (both data model & outbound Message)
-        for default in DEFAULTS:
+        for default in MEETING_DEFAULTS:
             if data[default] in (None, []):
-                data[default] = DEFAULTS[default]
-                setattr(request, default, DEFAULTS[default])
+                data[default] = MEETING_DEFAULTS[default]
+                setattr(request, default, MEETING_DEFAULTS[default])
 
         # convert dates from strings to Date objects; set month based on start_date
         if data['startDate']:
@@ -205,7 +205,7 @@ class MeetingApi(remote.Service):
         meeting_id = Meeting.allocate_ids(size=1, parent=profile_key)[0]
 
         # create a new key of kind Meeting from the profile_key
-        meeting_key = ndb.key(Meeting, meeting_id, parent=profile_key)
+        meeting_key = ndb.Key(Meeting, meeting_id, parent=profile_key)
 
         data['key'] = meeting_key
         data['organizerUserId'] = request.organizerUserId = user_id
