@@ -18,6 +18,7 @@ from protorpc import messages
 from google.appengine.ext import ndb
 
 
+# Profile-related Classes - - - - - - - - - - -
 class Profile(ndb.Model):
     """Profile -- User profile object"""
     userId       = ndb.StringProperty()
@@ -62,6 +63,7 @@ class TeeShirtSize(messages.Enum):
     XXXL_W = 15
 
 
+# Meeting-related Classes - - - - - - - - - - -
 class Meeting(ndb.Model):
     """Meeting -- Meeting object"""
     name            = ndb.StringProperty(required=True)
@@ -90,3 +92,20 @@ class MeetingForm(messages.Message):
     endDate         = messages.StringField(10)
     webSafeKey      = messages.StringField(11)
     organizerDisplayName = messages.StringField(12)
+
+
+class MeetingForms(messages.Message):
+    """multiple Meeting outbound form message"""
+    items = messages.MessageField(MeetingForm, 1, repeated=True)
+
+
+class MeetingQueryForm(messages.Message):
+    """Meeting query inbound form message"""
+    field       = messages.StringField(1)
+    operator    = messages.StringField(2)
+    value       = messages.StringField(3)
+
+
+class MeetingQueryForms(messages.Message):
+    """multiple MeetingQueryForm inbound form message"""
+    filters = messages.MessageField( MeetingQueryForm, 1, repeated=True )

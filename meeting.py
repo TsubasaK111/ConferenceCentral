@@ -24,13 +24,14 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 
 from models import Profile, ProfileMiniForm, ProfileForm, TeeShirtSize
-from models import Meeting, MeetingForm
+from models import Meeting, MeetingForm, MeetingForms, MeetingQueryForm, MeetingQueryForms
 
 from utils import getUserId
 
 from settings import WEB_CLIENT_ID, FRONTING_WEB_CLIENT_ID
 
 import pdb
+
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
@@ -47,7 +48,7 @@ MEETING_DEFAULTS = { "city": "Default City",
 class MeetingApi(remote.Service):
     """Meeting API v0.1"""
 
-    # - - - Profile Objects - - - - - - - - - - - - - - - - - - -
+# - - - Profile Objects - - - - - - - - - - - - - - - - - - -
     def _copyProfileToForm(self, profile):
         """Copy relevant fields from Profile to ProfileForm."""
         profileForm = ProfileForm()
@@ -100,7 +101,6 @@ class MeetingApi(remote.Service):
             print returned_profile_key
         return profile
 
-
     def _doProfile(self, save_request=None):
         """Get user Profile and return to user, possibly updating it first."""
         # get user Profile
@@ -122,7 +122,6 @@ class MeetingApi(remote.Service):
         print profile
         return self._copyProfileToForm(profile)
 
-
     @endpoints.method( message_types.VoidMessage, ProfileForm,
                        path='profile', http_method='GET', name='getProfile' )
     def getProfile(self, request):
@@ -139,8 +138,7 @@ class MeetingApi(remote.Service):
         print request
         return self._doProfile(request)
 
-
-    # - - - Meeting Objects - - - - - - - - - - - - - -
+# - - - Meeting Objects - - - - - - - - - - - - - -
     def _copyMeetingToForm(self, meeting, displayName):
         """Copy relevant fields from Meeting to MeetingForm"""
         meetingForm = MeetingForm()
@@ -215,13 +213,24 @@ class MeetingApi(remote.Service):
 
         return request
 
-
     @endpoints.method( MeetingForm, MeetingForm,
                        path='meeting', http_method='POST', name='createMeeting' )
     def createMeeting(self, request):
         """Create new meeting."""
         return self._createMeetingObject(request)
 
+    @endpoints.method( MeetingQueryForms, MeetingForms,
+                       path='queryMeetings',
+                       http_method='POST',
+                       name='queryMeetings' )
+    def queryMeetings(self, request):
+        """Query for meetings."""
+        meetings = Meeting.query()
+
+         # return individual MeetingForm object per Meeting
+        return MeetingForms( items=[self._copyMeetingToForm(meeting, "") \
+                             for meeting in meetings]
+                            )
 
 # registers API
 api = endpoints.api_server([MeetingApi])
