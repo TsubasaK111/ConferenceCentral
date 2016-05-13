@@ -79,7 +79,7 @@ class Meeting(ndb.Model):
 
 
 class MeetingForm(messages.Message):
-    """MeetingForm == Meeting outbound form message"""
+    """MeetingForm -- Meeting outbound form message"""
     name            = messages.StringField(1)
     description     = messages.StringField(2)
     organizerUserId = messages.StringField(3)

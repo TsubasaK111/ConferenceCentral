@@ -30,7 +30,7 @@ from utils import getUserId
 
 from settings import WEB_CLIENT_ID, FRONTING_WEB_CLIENT_ID
 
-import pdb
+import pdb, logging
 
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
@@ -75,9 +75,8 @@ class MeetingApi(remote.Service):
 
         # get user id by calling getUserId(user)
         user_id = getUserId(user)
-        print "user_id is: "
-        print user_id
-        print dir(user_id)
+        logging.debug( "user_id is: " )
+        logging.debug( user_id )
 
         # create a new key of kind Profile from the id
         profile_key = ndb.Key(Profile, user_id)
@@ -139,23 +138,6 @@ class MeetingApi(remote.Service):
         return self._doProfile(request)
 
 # - - - Meeting Objects - - - - - - - - - - - - - -
-    def _copyMeetingToForm(self, meeting, displayName):
-        """Copy relevant fields from Meeting to MeetingForm"""
-        meetingForm = MeetingForm()
-        for field in meetingForm.all_fields():
-            if hasattr(meeting, field.name):
-                # convert Date to date string: just copy others
-                if field.name.endswith('Date'):
-                    setattr(meeting, field.name, str(getattr(meeting, field.name)))
-                elif field.name == "webSafeKey":
-                    setattr(meeting, field.name, meeting.key.urlsafe())
-                else:
-                    setattr(meeting, field.name, getattr(meeting, field.name))
-            if displayName:
-                setattr(meeting, "organizerDisplayName", displayName)
-            meeting.check_initialized()
-            return meeting
-
     def _createMeetingObject(self, request):
         """Create or update Meeting object, returning MeetingForm/request."""
         # guard clauses / load prerequisites
@@ -165,7 +147,7 @@ class MeetingApi(remote.Service):
         user_id = getUserId(user)
 
         if not request.name:
-            raise endpoints.BadRequestException("Meeting 'name' field required")
+            raise endpoints.BadRequestException("Meeting 'name' field required!")
 
         # Oh gawd, dict comprehensions! :(
         # Copy MeetingForm/ProtoRPC Message into 'data' dict
@@ -175,6 +157,8 @@ class MeetingApi(remote.Service):
         del data['webSafeKey']
         del data['organizerDisplayName']
 
+        logging.debug( "data was: " )
+        logging.debug( data )
         # add default values for those mission (both data model & outbound Message)
         for default in MEETING_DEFAULTS:
             if data[default] in (None, []):
@@ -208,10 +192,35 @@ class MeetingApi(remote.Service):
         data['key'] = meeting_key
         data['organizerUserId'] = request.organizerUserId = user_id
 
+        logging.debug( "data is: " )
+        logging.debug( data )
+
         # create Meeting & return modified MeetingForm
         Meeting(**data).put()
 
         return request
+
+    def _copyMeetingToForm(self, meeting, displayName):
+        """Copy relevant fields from Meeting to MeetingForm"""
+        meetingForm = MeetingForm()
+
+        for field in meetingForm.all_fields():
+            logging.debug("field name is: "+field.name)
+            if hasattr(meeting, field.name):
+                # convert Date to date string: just copy others
+                if field.name.endswith('Date'):
+                    setattr(meetingForm, field.name, str(getattr(meeting, field.name)))
+                elif field.name == "webSafeKey":
+                    setattr(meetingForm, field.name, meeting.key.urlsafe())
+                else:
+                    setattr(meetingForm, field.name, getattr(meeting, field.name))
+            if displayName:
+                setattr(meetingForm, "organizerDisplayName", displayName)
+
+        logging.info( "meetingForm is: " )
+        logging.info( meetingForm )
+        meetingForm.check_initialized()
+        return meetingForm
 
     @endpoints.method( MeetingForm, MeetingForm,
                        path='meeting', http_method='POST', name='createMeeting' )
@@ -227,10 +236,19 @@ class MeetingApi(remote.Service):
         """Query for meetings."""
         meetings = Meeting.query()
 
-         # return individual MeetingForm object per Meeting
+        ##  return individual MeetingForm object per Meeting
         return MeetingForms( items=[self._copyMeetingToForm(meeting, "") \
                              for meeting in meetings]
                             )
+
+        ### An easier syntax version is this:
+        # meetingFormsItems = []
+        # for meeting in meetings:
+        #     meetingForm = self._copyMeetingToForm(meeting,"")
+        #     meetingFormsItems.append( meetingForm )
+        # return MeetingForms( items=meetingFormsItems )
+
+
 
 # registers API
 api = endpoints.api_server([MeetingApi])
