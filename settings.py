@@ -2,11 +2,11 @@
 
 """settings.py
 
-Udacity meeting server-side Python App Engine app user settings
+Udacity conference server-side Python App Engine app user settings
 
 $Id$
 
-created/forked from meeting.py by wesc on 2014 may 24
+created/forked from conference.py by wesc on 2014 may 24
 
 """
 

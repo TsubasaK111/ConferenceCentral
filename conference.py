@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 """
-meeting.py -- Udacity meeting server-side Python App Engine API;
+conference.py -- Udacity conference server-side Python App Engine API;
     uses Google Cloud Endpoints
 
-$Id: meeting.py,v 1.25 2014/05/24 23:42:19 wesc Exp wesc $
+$Id: conference.py,v 1.25 2014/05/24 23:42:19 wesc Exp wesc $
 
 created by wesc on 2014 apr 21
 
@@ -24,7 +24,7 @@ from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 
 from models import Profile, ProfileMiniForm, ProfileForm, TeeShirtSize
-from models import Meeting, MeetingForm, MeetingForms, MeetingQueryForm, MeetingQueryForms
+from models import Conference, ConferenceForm, ConferenceForms, ConferenceQueryForm, ConferenceQueryForms
 
 from utils import getUserId
 
@@ -41,12 +41,12 @@ MEETING_DEFAULTS = { "city": "Default City",
                      "topics": [ "Default", "Topic" ], }
 
 
-@endpoints.api( name='meeting', version='v1', scopes=[EMAIL_SCOPE],
+@endpoints.api( name='conference', version='v1', scopes=[EMAIL_SCOPE],
                 allowed_client_ids=[ WEB_CLIENT_ID,
                                      FRONTING_WEB_CLIENT_ID,
                                      API_EXPLORER_CLIENT_ID ], )
-class MeetingApi(remote.Service):
-    """Meeting API v0.1"""
+class ConferenceApi(remote.Service):
+    """Conference API v0.1"""
 
 # - - - Profile Objects - - - - - - - - - - - - - - - - - - -
     def _copyProfileToForm(self, profile):
@@ -137,9 +137,9 @@ class MeetingApi(remote.Service):
         print request
         return self._doProfile(request)
 
-# - - - Meeting Objects - - - - - - - - - - - - - -
-    def _createMeetingObject(self, request):
-        """Create or update Meeting object, returning MeetingForm/request."""
+# - - - Conference Objects - - - - - - - - - - - - - -
+    def _createConferenceObject(self, request):
+        """Create or update Conference object, returning ConferenceForm/request."""
         # guard clauses / load prerequisites
         user = endpoints.get_current_user()
         if not user:
@@ -147,10 +147,10 @@ class MeetingApi(remote.Service):
         user_id = getUserId(user)
 
         if not request.name:
-            raise endpoints.BadRequestException("Meeting 'name' field required!")
+            raise endpoints.BadRequestException("Conference 'name' field required!")
 
         # Oh gawd, dict comprehensions! :(
-        # Copy MeetingForm/ProtoRPC Message into 'data' dict
+        # Copy ConferenceForm/ProtoRPC Message into 'data' dict
         data = {
             field.name: getattr(request, field.name) for field in request.all_fields()
             }
@@ -184,71 +184,71 @@ class MeetingApi(remote.Service):
         profile_key = ndb.Key(Profile, user_id)
 
         # arbitrarily create new, unique id via ndb.model.alloc
-        meeting_id = Meeting.allocate_ids(size=1, parent=profile_key)[0]
+        conference_id = Conference.allocate_ids(size=1, parent=profile_key)[0]
 
-        # create a new key of kind Meeting from the profile_key
-        meeting_key = ndb.Key(Meeting, meeting_id, parent=profile_key)
+        # create a new key of kind Conference from the profile_key
+        conference_key = ndb.Key(Conference, conference_id, parent=profile_key)
 
-        data['key'] = meeting_key
+        data['key'] = conference_key
         data['organizerUserId'] = request.organizerUserId = user_id
 
         logging.debug( "data is: " )
         logging.debug( data )
 
-        # create Meeting & return modified MeetingForm
-        Meeting(**data).put()
+        # create Conference & return modified ConferenceForm
+        Conference(**data).put()
 
         return request
 
-    def _copyMeetingToForm(self, meeting, displayName):
-        """Copy relevant fields from Meeting to MeetingForm"""
-        meetingForm = MeetingForm()
+    def _copyConferenceToForm(self, conference, displayName):
+        """Copy relevant fields from Conference to ConferenceForm"""
+        conferenceForm = ConferenceForm()
 
-        for field in meetingForm.all_fields():
+        for field in conferenceForm.all_fields():
             logging.debug("field name is: "+field.name)
-            if hasattr(meeting, field.name):
+            if hasattr(conference, field.name):
                 # convert Date to date string: just copy others
                 if field.name.endswith('Date'):
-                    setattr(meetingForm, field.name, str(getattr(meeting, field.name)))
+                    setattr(conferenceForm, field.name, str(getattr(conference, field.name)))
                 elif field.name == "webSafeKey":
-                    setattr(meetingForm, field.name, meeting.key.urlsafe())
+                    setattr(conferenceForm, field.name, conference.key.urlsafe())
                 else:
-                    setattr(meetingForm, field.name, getattr(meeting, field.name))
+                    setattr(conferenceForm, field.name, getattr(conference, field.name))
             if displayName:
-                setattr(meetingForm, "organizerDisplayName", displayName)
+                setattr(conferenceForm, "organizerDisplayName", displayName)
 
-        logging.info( "meetingForm is: " )
-        logging.info( meetingForm )
-        meetingForm.check_initialized()
-        return meetingForm
+        logging.info( "conferenceForm is: " )
+        logging.info( conferenceForm )
+        conferenceForm.check_initialized()
+        return conferenceForm
 
-    @endpoints.method( MeetingForm, MeetingForm,
-                       path='meeting', http_method='POST', name='createMeeting' )
-    def createMeeting(self, request):
-        """Create new meeting."""
-        return self._createMeetingObject(request)
+    @endpoints.method( ConferenceForm, ConferenceForm,
+                       path='conference', http_method='POST', name='createConference' )
+    def createConference(self, request):
+        """Create new conference."""
+        return self._createConferenceObject(request)
 
-    @endpoints.method( MeetingQueryForms, MeetingForms,
-                       path='queryMeetings',
+    @endpoints.method( ConferenceQueryForms, ConferenceForms,
+                       path='queryConferences',
                        http_method='POST',
-                       name='queryMeetings' )
-    def queryMeetings(self, request):
-        """Query for meetings."""
-        meetings = Meeting.query()
+                       name='queryConferences' )
+    def queryConferences(self, request):
+        """Query for conferences."""
+        conferences = Conference.query()
 
-        ##  return individual MeetingForm object per Meeting
-        return MeetingForms( items=[self._copyMeetingToForm(meeting, "") \
-                             for meeting in meetings]
+        ##  return individual ConferenceForm object per Conference
+        return ConferenceForms( items=[self._copyConferenceToForm(conference, "") \
+                             for conference in conferences]
                             )
 
         ### An easier syntax version is this:
-        # meetingFormsItems = []
-        # for meeting in meetings:
-        #     meetingForm = self._copyMeetingToForm(meeting,"")
-        #     meetingFormsItems.append( meetingForm )
-        # return MeetingForms( items=meetingFormsItems )
+        # conferenceFormsItems = []
+        # for conference in conferences:
+        #     conferenceForm = self._copyConferenceToForm(conference,"")
+        #     conferenceFormsItems.append( conferenceForm )
+        # return ConferenceForms( items=conferenceFormsItems )
 
 
 
 # registers API
-api = endpoints.api_server([MeetingApi])
+api = endpoints.api_server([ConferenceApi])

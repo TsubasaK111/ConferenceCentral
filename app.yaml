@@ -31,7 +31,7 @@ handlers:       # static then dynamic
   secure: always
 
 - url: /_ah/spi/.*
-  script: meeting.api
+  script: conference.api
   secure: always
 
 libraries:

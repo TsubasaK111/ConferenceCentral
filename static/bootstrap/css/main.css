@@ -66,7 +66,7 @@ body {
     vertical-align: middle;
 }
 
-#show-meetings-tab {
+#show-conferences-tab {
     margin-bottom: 20px;
 }
 
@@ -80,7 +80,7 @@ ul#filters span.glyphicon-remove {
     font-size: 80%;
 }
 
-ul#meetings-list {
+ul#conferences-list {
     list-style: none;
 }
 
@@ -89,7 +89,7 @@ ul#meetings-list {
     padding-bottom: 50px;
     color: #f8f8f8;
     text-shadow: black 0.1em 0.1em 0.2em;
-    background: url(/img/meeting-room.jpg) no-repeat center center;
+    background: url(/img/conference-room.jpg) no-repeat center center;
     background-size: cover;
     text-align: center;
 }

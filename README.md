@@ -1,4 +1,4 @@
-# Meeting Master
+# Conference Master
 My version of Udacity's Full Stack Foundations "Conference Central" Exercise
 utilising Google App Engine.
 

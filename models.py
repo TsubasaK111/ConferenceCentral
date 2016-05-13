@@ -2,11 +2,11 @@
 
 """models.py
 
-Udacity meeting server-side Python App Engine data & ProtoRPC models
+Udacity conference server-side Python App Engine data & ProtoRPC models
 
 $Id: models.py,v 1.1 2014/05/24 22:01:10 wesc Exp $
 
-created/forked from meetings.py by wesc on 2014 may 24
+created/forked from conferences.py by wesc on 2014 may 24
 
 """
 
@@ -63,9 +63,9 @@ class TeeShirtSize(messages.Enum):
     XXXL_W = 15
 
 
-# Meeting-related Classes - - - - - - - - - - -
-class Meeting(ndb.Model):
-    """Meeting -- Meeting object"""
+# Conference-related Classes - - - - - - - - - - -
+class Conference(ndb.Model):
+    """Conference -- Conference object"""
     name            = ndb.StringProperty(required=True)
     description     = ndb.StringProperty()
     organizerUserId = ndb.StringProperty()
@@ -78,8 +78,8 @@ class Meeting(ndb.Model):
     endDate         = ndb.DateProperty()
 
 
-class MeetingForm(messages.Message):
-    """MeetingForm -- Meeting outbound form message"""
+class ConferenceForm(messages.Message):
+    """ConferenceForm -- Conference outbound form message"""
     name            = messages.StringField(1)
     description     = messages.StringField(2)
     organizerUserId = messages.StringField(3)
@@ -94,18 +94,18 @@ class MeetingForm(messages.Message):
     organizerDisplayName = messages.StringField(12)
 
 
-class MeetingForms(messages.Message):
-    """multiple Meeting outbound form message"""
-    items = messages.MessageField(MeetingForm, 1, repeated=True)
+class ConferenceForms(messages.Message):
+    """multiple Conference outbound form message"""
+    items = messages.MessageField(ConferenceForm, 1, repeated=True)
 
 
-class MeetingQueryForm(messages.Message):
-    """Meeting query inbound form message"""
+class ConferenceQueryForm(messages.Message):
+    """Conference query inbound form message"""
     field       = messages.StringField(1)
     operator    = messages.StringField(2)
     value       = messages.StringField(3)
 
 
-class MeetingQueryForms(messages.Message):
-    """multiple MeetingQueryForm inbound form message"""
-    filters = messages.MessageField( MeetingQueryForm, 1, repeated=True )
+class ConferenceQueryForms(messages.Message):
+    """multiple ConferenceQueryForm inbound form message"""
+    filters = messages.MessageField( ConferenceQueryForm, 1, repeated=True )
