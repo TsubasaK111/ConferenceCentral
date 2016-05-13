@@ -237,16 +237,35 @@ class ConferenceApi(remote.Service):
         conferences = Conference.query()
 
         ##  return individual ConferenceForm object per Conference
-        return ConferenceForms( items=[self._copyConferenceToForm(conference, "") \
-                             for conference in conferences]
-                            )
+        ## (another dict comprehension!)
+        return ConferenceForms(
+            items=[ self._copyConferenceToForm(conference, "") \
+                    for conference in conferences
+                  ]
+        )
 
-        ### An easier syntax version is this:
-        # conferenceFormsItems = []
-        # for conference in conferences:
-        #     conferenceForm = self._copyConferenceToForm(conference,"")
-        #     conferenceFormsItems.append( conferenceForm )
-        # return ConferenceForms( items=conferenceFormsItems )
+    @endpoints.method( ConferenceQueryForms, ConferenceForms,
+                      path="getConferencesCreated",
+                      http_method="POST",
+                      name="getConferencesCreated" )
+    def getConferencesCreated(self, request):
+
+        # guard clauses / load prerequisites
+        user = endpoints.get_current_user()
+        if not user:
+            raise endpoints.UnauthorizedException('Authorization required')
+        user_id = getUserId(user)
+
+        ### They call this an "ancestor/descendant query":
+        conferencesOfUser = Conference.query(ancestor=ndb.Key(Profile, user_id))
+
+        return ConferenceForms(
+            items = [ self._copyConferenceToForm(conference, "") \
+                      for conference in conferencesOfUser
+                    ]
+        )
+
+
 
 
 
