@@ -244,7 +244,7 @@ class ConferenceApi(remote.Service):
                   ]
         )
 
-    @endpoints.method( ConferenceQueryForms, ConferenceForms,
+    @endpoints.method( message_types.VoidMessage, ConferenceForms,
                       path="getConferencesCreated",
                       http_method="POST",
                       name="getConferencesCreated" )
@@ -265,8 +265,33 @@ class ConferenceApi(remote.Service):
                     ]
         )
 
+    @endpoints.method( message_types.VoidMessage, ConferenceForms,
+                       path="filterPlayground",
+                       http_method="POST",
+                       name="filterPlayground" )
+    def filterPlayground(self, request):
+        ## Simple syntax for a filter query
+        # filteredConferences = Conference.query(Conference.city == "London")
+
+        ## AND syntax with SORTBY
+        filteredConferences = Conference.query(
+                                ndb.AND(
+                                    Conference.city == "London",
+                                    Conference.topics == "Medical Innovations"
+                                )).order(
+                                    Conference.maxAttendees
+                                ).filter(
+                                    Conference.month == 6
+                                ).filter(
+                                    Conference.maxAttendees > 10
+                                )
 
 
+        return ConferenceForms(
+            items = [ self._copyConferenceToForm( conference, "" ) \
+                      for conference in filteredConferences
+                    ]
+        )
 
 
 # registers API
