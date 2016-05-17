@@ -40,6 +40,18 @@ MEETING_DEFAULTS = { "city": "Default City",
                      "seatsAvailable": 0,
                      "topics": [ "Default", "Topic" ], }
 
+OPERATORS = { 'EQ':   '=',
+              'GT':   '>',
+              'GTEQ': '>=',
+              'LT':   '<',
+              'LTEQ': '<=',
+              'NE':   '!=' }
+
+FIELDS =    { 'CITY': 'city',
+              'TOPIC': 'topics',
+              'MONTH': 'month',
+              'MAX_ATTENDEES': 'maxAttendees', }
+
 
 @endpoints.api( name='conference', version='v1', scopes=[EMAIL_SCOPE],
                 allowed_client_ids=[ WEB_CLIENT_ID,
@@ -121,6 +133,7 @@ class ConferenceApi(remote.Service):
         print profile
         return self._copyProfileToForm(profile)
 
+# - - - Profile Endpoints - - - - - - - - - - - - - -
     @endpoints.method( message_types.VoidMessage, ProfileForm,
                        path='profile', http_method='GET', name='getProfile' )
     def getProfile(self, request):
@@ -222,6 +235,58 @@ class ConferenceApi(remote.Service):
         conferenceForm.check_initialized()
         return conferenceForm
 
+# - - - Querying Helper Methods - - - - - - - - - - - - - -
+    def _getQuery(self, request):
+        """Return formatted query from the submitted filters."""
+        conferences = Conference.query()
+        inequality_filter, filters = self._formatFilters(request.filters)
+
+        # If exists, sort on inequality filter first
+        if not inequality_filter:
+            conferences = conferences.order(Conference.name)
+        else:
+            conferences = conferences.\
+                order(ndb.GenericProperty(inequality_filter)).\
+                order(Conference.name)
+
+        for filtr in filters:
+            if filtr["field"] in ["month", "maxAttendees"]:
+                filtr["value"] = int(filtr["value"])
+            formatted_query = ndb.query.FilterNode( filtr["field"],
+                                                    filtr["operator"],
+                                                    filtr["value"] )
+            conferences = conferences.filter(formatted_query)
+        return conferences
+
+
+    def _formatFilters(self, filters):
+        """Parse, check validity and format user supplied filters."""
+        formatted_filters = []
+        inequality_field = None
+
+        for f in filters:
+            filtr = {field.name: getattr(f, field.name) for field in f.all_fields()}
+
+            try:
+                filtr["field"] = FIELDS[filtr["field"]]
+                filtr["operator"] = OPERATORS[filtr["operator"]]
+            except KeyError:
+                raise endpoints.BadRequestException("Filter contains invalid field or operator.")
+
+            # Every operation except "=" is an inequality
+            if filtr["operator"] != "=":
+                # check if inequality operation has been used in previous filters
+                # disallow the filter if inequality was performed on a different field before
+                # track the field on which the inequality operation is performed
+                if inequality_field and inequality_field != filtr["field"]:
+                    raise endpoints.BadRequestException("Inequality filter is allowed on only one field.")
+                else:
+                    inequality_field = filtr["field"]
+
+            formatted_filters.append(filtr)
+        return (inequality_field, formatted_filters)
+
+# - - - Conference Endpoints - - - - - - - - - - - - - -
     @endpoints.method( ConferenceForm, ConferenceForm,
                        path='conference', http_method='POST', name='createConference' )
     def createConference(self, request):
@@ -234,8 +299,7 @@ class ConferenceApi(remote.Service):
                        name='queryConferences' )
     def queryConferences(self, request):
         """Query for conferences."""
-        conferences = Conference.query()
-
+        conferences = self._getQuery(request)
         ##  return individual ConferenceForm object per Conference
         ## (another dict comprehension!)
         return ConferenceForms(
@@ -249,16 +313,13 @@ class ConferenceApi(remote.Service):
                       http_method="POST",
                       name="getConferencesCreated" )
     def getConferencesCreated(self, request):
-
         # guard clauses / load prerequisites
         user = endpoints.get_current_user()
         if not user:
             raise endpoints.UnauthorizedException('Authorization required')
         user_id = getUserId(user)
-
         ### They call this an "ancestor/descendant query":
         conferencesOfUser = Conference.query(ancestor=ndb.Key(Profile, user_id))
-
         return ConferenceForms(
             items = [ self._copyConferenceToForm(conference, "") \
                       for conference in conferencesOfUser
@@ -273,7 +334,7 @@ class ConferenceApi(remote.Service):
         ## Simple syntax for a filter query
         # filteredConferences = Conference.query(Conference.city == "London")
 
-        ## AND syntax with SORTBY
+        ## AND syntax with sortBy
         filteredConferences = Conference.query(
                                 ndb.AND(
                                     Conference.city == "London",
@@ -285,8 +346,6 @@ class ConferenceApi(remote.Service):
                                 ).filter(
                                     Conference.maxAttendees > 10
                                 )
-
-
         return ConferenceForms(
             items = [ self._copyConferenceToForm( conference, "" ) \
                       for conference in filteredConferences
