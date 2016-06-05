@@ -1,6 +1,6 @@
 # Conference Master
-My version of Udacity's Full Stack Foundations "Conference Central" Exercise
-utilising Google App Engine.
+TsubasaK111's version of the Udacity Full Stack Foundations "Conference Central"
+ Exercise utilising Google App Engine.
 
 ## Products
 - [App Engine][1]

@@ -79,7 +79,7 @@ class Conference(ndb.Model):
 
 
 class ConferenceForm(messages.Message):
-    """ConferenceForm -- Conference outbound form message"""
+    """Conference outbound form message"""
     name            = messages.StringField(1)
     description     = messages.StringField(2)
     organizerUserId = messages.StringField(3)
@@ -95,7 +95,7 @@ class ConferenceForm(messages.Message):
 
 
 class ConferenceForms(messages.Message):
-    """multiple Conference outbound form message"""
+    """multiple ConferenceForm outbound form message"""
     items = messages.MessageField(ConferenceForm, 1, repeated=True)
 
 

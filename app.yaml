@@ -4,7 +4,7 @@ runtime: python27
 api_version: 1
 threadsafe: yes
 
-handlers:       # static then dynamic
+handlers: # static then dynamic
 
 - url: /favicon\.ico
   static_files: favicon.ico
@@ -39,6 +39,6 @@ libraries:
 - name: endpoints
   version: latest
 
-# pycrypto library used for OAuth2 (req'd for authenticated APIs)
+# pycrypto library used for OAuth2 (required for authenticated APIs)
 - name: pycrypto
   version: latest
