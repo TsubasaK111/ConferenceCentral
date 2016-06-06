@@ -249,12 +249,12 @@ class ConferenceApi(remote.Service):
                 order(ndb.GenericProperty(inequality_filter)).\
                 order(Conference.name)
 
-        for filtr in filters:
-            if filtr["field"] in ["month", "maxAttendees"]:
-                filtr["value"] = int(filtr["value"])
-            formatted_query = ndb.query.FilterNode( filtr["field"],
-                                                    filtr["operator"],
-                                                    filtr["value"] )
+        for filtre in filters:
+            if filtre["field"] in ["month", "maxAttendees"]:
+                filtre["value"] = int(filtre["value"])
+            formatted_query = ndb.query.FilterNode( filtre["field"],
+                                                    filtre["operator"],
+                                                    filtre["value"] )
             conferences = conferences.filter(formatted_query)
         return conferences
 
@@ -265,25 +265,25 @@ class ConferenceApi(remote.Service):
         inequality_field = None
 
         for f in filters:
-            filtr = {field.name: getattr(f, field.name) for field in f.all_fields()}
+            filtre = {field.name: getattr(f, field.name) for field in f.all_fields()}
 
             try:
-                filtr["field"] = FIELDS[filtr["field"]]
-                filtr["operator"] = OPERATORS[filtr["operator"]]
+                filtre["field"] = FIELDS[filtre["field"]]
+                filtre["operator"] = OPERATORS[filtre["operator"]]
             except KeyError:
                 raise endpoints.BadRequestException("Filter contains invalid field or operator.")
 
             # Every operation except "=" is an inequality
-            if filtr["operator"] != "=":
+            if filtre["operator"] != "=":
                 # check if inequality operation has been used in previous filters
                 # disallow the filter if inequality was performed on a different field before
                 # track the field on which the inequality operation is performed
-                if inequality_field and inequality_field != filtr["field"]:
+                if inequality_field and inequality_field != filtre["field"]:
                     raise endpoints.BadRequestException("Inequality filter is allowed on only one field.")
                 else:
-                    inequality_field = filtr["field"]
+                    inequality_field = filtre["field"]
 
-            formatted_filters.append(filtr)
+            formatted_filters.append(filtre)
         return (inequality_field, formatted_filters)
 
 # - - - Conference Endpoints - - - - - - - - - - - - - -
@@ -300,8 +300,8 @@ class ConferenceApi(remote.Service):
     def queryConferences(self, request):
         """Query for conferences."""
         conferences = self._getQuery(request)
-        ##  return individual ConferenceForm object per Conference
-        ## (another dict comprehension!)
+        # return individual ConferenceForm object per Conference
+        # (another dict comprehension!)
         return ConferenceForms(
             items=[ self._copyConferenceToForm(conference, "") \
                     for conference in conferences
@@ -332,20 +332,20 @@ class ConferenceApi(remote.Service):
                        name="filterPlayground" )
     def filterPlayground(self, request):
         ## Simple syntax for a filter query
-        # filteredConferences = Conference.query(Conference.city == "London")
+        filteredConferences = Conference.query(Conference.city == "London")
 
         ## AND syntax with sortBy
-        filteredConferences = Conference.query(
-                                ndb.AND(
-                                    Conference.city == "London",
-                                    Conference.topics == "Medical Innovations"
-                                )).order(
-                                    Conference.maxAttendees
-                                ).filter(
-                                    Conference.month == 6
-                                ).filter(
-                                    Conference.maxAttendees > 10
-                                )
+        # filteredConferences = Conference.query(
+        #                         ndb.AND(
+        #                             Conference.city == "London",
+        #                             Conference.topics == "Medical Innovations"
+        #                         )).order(
+        #                             Conference.maxAttendees
+        #                         ).filter(
+        #                             Conference.month == 6
+        #                         ).filter(
+        #                             Conference.maxAttendees > 10
+        #                         )
         return ConferenceForms(
             items = [ self._copyConferenceToForm( conference, "" ) \
                       for conference in filteredConferences
