@@ -392,7 +392,7 @@ class ConferenceApi(remote.Service):
 
 # - - - Registration - - - - - - - - - - - - - - - - - - - -
     @ndb.transactional(xg=True)
-    def _conferenceRegistration(self, request, registered=True):
+    def _conferenceRegistration(self, request, register=True):
         """Register or unregister user for selected conference."""
         returnValue = None
         profile = self._getProfileFromUser() # get user Profile
@@ -406,7 +406,7 @@ class ConferenceApi(remote.Service):
                 'No conference found with key: %s' % conferenceKey)
 
         # register
-        if registered:
+        if register:
             # check if user already registered otherwise add
             if conferenceKey in profile.conferenceKeysToAttend:
                 raise ConflictException(
@@ -441,11 +441,18 @@ class ConferenceApi(remote.Service):
 
 
     @endpoints.method(CONF_GET_REQUEST, BooleanMessage,
-            path='conference/{webSafeKey}',
+            path='conference/{webSafeKey}/register',
             http_method='POST', name='registerForConference')
     def registerForConference(self, request):
         """Register user for selected conference."""
         return self._conferenceRegistration(request)
+
+    @endpoints.method(CONF_GET_REQUEST, BooleanMessage,
+            path='conference/{webSafeKey}/unregister',
+            http_method='POST', name='unregisterFromConference')
+    def unregisterFromConference(self, request):
+        """Unregister user from selected registered conference."""
+        return self._conferenceRegistration(request, register = False)
 
 # registers API
 api = endpoints.api_server([ConferenceApi])
