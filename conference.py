@@ -55,7 +55,7 @@ FIELDS =    { 'CITY': 'city',
 
 CONF_GET_REQUEST = endpoints.ResourceContainer(
     message_types.VoidMessage,
-    webSafeConferenceKey=messages.StringField(1),
+    webSafeKey=messages.StringField(1),
 )
 
 @endpoints.api( name='conference', version='v1', scopes=[EMAIL_SCOPE],
@@ -228,10 +228,10 @@ class ConferenceApi(remote.Service):
                 # convert Date to date string: just copy others
                 if field.name.endswith('Date'):
                     setattr(conferenceForm, field.name, str(getattr(conference, field.name)))
-                elif field.name == "webSafeKey":
-                    setattr(conferenceForm, field.name, conference.key.urlsafe())
                 else:
                     setattr(conferenceForm, field.name, getattr(conference, field.name))
+            elif field.name == "webSafeKey":
+                setattr(conferenceForm, field.name, conference.key.urlsafe())
             if displayName:
                 setattr(conferenceForm, "organizerDisplayName", displayName)
 
@@ -338,7 +338,7 @@ class ConferenceApi(remote.Service):
         """Get list of conferences that user has registered for."""
         # TODO:
         # step 1: get user profile
-        profile = self._getProfileFromUser
+        profile = self._getProfileFromUser()
 
         # step 2: get conferenceKeysToAttend from profile.
         # to make a ndb key from webSafe key you can use:
@@ -441,7 +441,7 @@ class ConferenceApi(remote.Service):
 
 
     @endpoints.method(CONF_GET_REQUEST, BooleanMessage,
-            path='conference/{webSafeConferenceKey}',
+            path='conference/{webSafeKey}',
             http_method='POST', name='registerForConference')
     def registerForConference(self, request):
         """Register user for selected conference."""
