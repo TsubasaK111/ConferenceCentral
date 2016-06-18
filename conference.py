@@ -305,12 +305,25 @@ class ConferenceApi(remote.Service):
     def queryConferences(self, request):
         """Query for conferences."""
         conferences = self._getQuery(request)
+
+        # fetch organizer displayName from profiles to return full ConferenceForms.
+        organizers = [ (ndb.Key(Profile, conference.organizerUserId)) \
+                        for conference in conferences
+                     ]
+        profiles = ndb.get_multi(organizers)
+
+        names = {}
+        for profile in profiles:
+            names[profile.key.id()] = profile.displayName
+
         # return individual ConferenceForm object per Conference
         # (another dict comprehension!)
         return ConferenceForms(
-            items=[ self._copyConferenceToForm(conference, "") \
-                    for conference in conferences
-                  ]
+            items = [ self._copyConferenceToForm(
+                            conference,
+                            names[conference.organizerUserId]
+                        ) for conference in conferences
+                    ]
         )
 
     @endpoints.method( message_types.VoidMessage, ConferenceForms,
@@ -349,19 +362,15 @@ class ConferenceApi(remote.Service):
         for webSafeKey in webSafeConferenceKeys:
             conferenceKeys.append(ndb.Key(urlsafe=webSafeKey))
 
-        ## Query w/o get_multi()
-        # conferences = []
-        # for conferenceKey in conferenceKeys:
-        #     conferences.add(ndb.Key(urlsafe=conferenceKey).get())
-
         # step 3: fetch conferences from datastore.
         # Use get_multi(array_of_keys) to fetch all keys at once.
         # Do not fetch them one by one!
         conferences = ndb.get_multi(conferenceKeys)
 
         # return set of ConferenceForm objects per Conference
-        return ConferenceForms(items=[self._copyConferenceToForm(conference, "")\
-          for conference in conferences]
+        return ConferenceForms(
+            items = [ self._copyConferenceToForm(conference, "") \
+                    for conference in conferences ]
         )
 
     @endpoints.method( message_types.VoidMessage, ConferenceForms,
