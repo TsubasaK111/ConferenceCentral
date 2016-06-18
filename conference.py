@@ -20,12 +20,13 @@ import time
 import endpoints
 from protorpc import messages, message_types, remote
 
+from google.appengine.api import memcache
 from google.appengine.api import urlfetch
 from google.appengine.ext import ndb
 
 from models import Profile, ProfileMiniForm, ProfileForm, TeeShirtSize
 from models import Conference, ConferenceForm, ConferenceForms, ConferenceQueryForm, ConferenceQueryForms
-from models import BooleanMessage, ConflictException
+from models import BooleanMessage, ConflictException, StringMessage
 
 from utils import getUserId
 
@@ -36,6 +37,7 @@ import pdb, logging
 
 EMAIL_SCOPE = endpoints.EMAIL_SCOPE
 API_EXPLORER_CLIENT_ID = endpoints.API_EXPLORER_CLIENT_ID
+MEMCACHE_ANNOUNCEMENTS_KEY = "announcements"
 MEETING_DEFAULTS = { "city": "Default City",
                      "maxAttendees": 0,
                      "seatsAvailable": 0,
@@ -448,7 +450,6 @@ class ConferenceApi(remote.Service):
         conference.put()
         return BooleanMessage(data=returnValue)
 
-
     @endpoints.method(CONF_GET_REQUEST, BooleanMessage,
             path='conference/{webSafeKey}/register',
             http_method='POST', name='registerForConference')
@@ -462,6 +463,47 @@ class ConferenceApi(remote.Service):
     def unregisterFromConference(self, request):
         """Unregister user from selected registered conference."""
         return self._conferenceRegistration(request, register = False)
+
+# - - - Announcements - - - - - - - - - - - - - - - - - - - -
+    @staticmethod
+    def _cacheAnnouncement():
+        """Create Announcement & assign to memcache;
+        used by memcache cron job & putAnnouncement(). """
+        nearSoldOutConferences = Conference.query(ndb.AND(
+            Conference.seatsAvailable <= 5,
+            Conference.seatsAvailable > 0
+        )).fetch(
+            projection = [Conference.name]
+        )
+
+        if nearSoldOutConferences:
+            # format announcement and set it in memcache.
+            announcement = """Last chance to attend! The following conferences
+                are nearly sold out:
+                {nearSoldOutConferences}""".format(
+                    nearSoldOutConferences = ", ".join(
+                        c.name for c in nearSoldOutConferences
+                    )
+                )
+            memcache.set(MEMCACHE_ANNOUNCEMENTS_KEY, announcement)
+        else:
+            # delete the memcache annoucements entry.
+            announcement = ""
+            memcache.delete(MEMCACHE_ANNOUNCEMENTS_KEY)
+
+        return announcement
+
+    @endpoints.method(message_types.VoidMessage, StringMessage,
+        path='conference/announcement/get',
+        http_method='GET', name='getAnnouncement')
+    def getAnnouncement(self, request):
+        """Return Announcement from memcache."""
+        # TODO 1
+        # return an existing announcement from memcache OR an empty string.
+        announcement = memcache.get(MEMCACHE_ANNOUNCEMENTS_KEY)
+        if not announcement:
+            announcement = ""
+        return StringMessage(data=announcement)
 
 # registers API
 api = endpoints.api_server([ConferenceApi])

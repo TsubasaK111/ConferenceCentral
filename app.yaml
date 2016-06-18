@@ -30,6 +30,10 @@ handlers: # static then dynamic
   upload: templates/index\.html
   secure: always
 
+- url: /crons/set_announcement
+  script: main.app
+  login: admin
+
 - url: /_ah/spi/.*
   script: conference.api
   secure: always
