@@ -4,6 +4,9 @@ runtime: python27
 api_version: 1
 threadsafe: yes
 
+builtins:
+- appstats: on
+
 handlers: # static then dynamic
 
 - url: /favicon\.ico
